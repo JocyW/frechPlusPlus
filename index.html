@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Frech = Frech + 1</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+</head>
+<style>
+    body {
+        display: flex;
+        flex-direction: row;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+    }
+
+    .card {
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+        width: 100%;
+        max-width: 400px;
+        padding: 10px;
+    }
+
+    button {
+        margin: 10px 0;
+    }
+
+    h1 {
+        text-align: center;
+    }
+
+    .alert {
+        margin: 0;
+    }
+</style>
+<body>
+<div class="card">
+    <h1>Frech = Frech + 1</h1>
+    <textarea id="text" class="form-control"></textarea>
+    <button id="start" class="btn btn-success">Start</button>
+
+    <p class="alert alert-danger" id="alert" style="display: none;"></p>
+</div>
+<script>
+    const $text = document.querySelector('#text');
+    const $start = document.querySelector('#start');
+    const $output = document.querySelector('#alert');
+
+    const YOU = 'du';
+    const ME = 'ich';
+    const FRECH = 'frech';
+    const EXTENDED = 'dass ?1 das ' + FRECH + ' ?2';
+
+    const EXTENDED_YOU = ' ' + EXTENDED.replace('?1', YOU).replace('?2', 'findest');
+    const EXTENDED_ME = ' ' + EXTENDED.replace('?1', ME).replace('?2', 'finde');
+
+    let timer;
+
+    $start.addEventListener('click', () => {
+        calcFrech();
+    });
+
+    $text.addEventListener('keyup', () => {
+        if (timer) {
+            window.clearTimeout(timer);
+        }
+
+        timer = window.setTimeout(calcFrech, 500);
+    });
+
+    function calcFrech() {
+        resetError();
+        let text = $text.value.toLowerCase();
+
+        let frechMatches = text.match(new RegExp(FRECH, 'g'));
+        if (frechMatches) {
+            let lastMe = text.lastIndexOf(ME);
+            let lastYou = text.lastIndexOf(YOU);
+
+            if (lastMe < 0 && lastYou < 0 || lastMe > lastYou) {
+                text += EXTENDED_YOU
+            } else if (lastMe < lastYou) {
+                text += EXTENDED_ME
+            }
+        } else {
+            text = 'No ' + FRECH + ' found';
+        }
+        showError(text);
+    }
+
+    function resetError() {
+        showError('');
+    }
+
+    function showError(message) {
+        $output.innerHTML = message;
+
+        if (message && $output.style.display === 'none') {
+            $output.style.display = 'block';
+        } else if (!message && $output.style.display === 'block') {
+            $output.style.display = 'none';
+        }
+    }
+</script>
+</body>
+</html>
