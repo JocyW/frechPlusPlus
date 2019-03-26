@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Frech = Frech + 1</title>
+    <title>Title</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
 </head>
 <style>
@@ -39,9 +39,43 @@
     <textarea id="text" class="form-control"></textarea>
     <button id="start" class="btn btn-success">Start</button>
 
-    <p class="alert alert-danger" id="alert" style="display: none;"></p>
+    <p id="alert" style="display: none;"></p>
 </div>
 <script>
+
+    class Alert {
+        constructor(elem) {
+            this.type = 'success';
+            this.message = '';
+            this.display = false;
+            this.elem = elem;
+        }
+
+        setDisplay(display) {
+            this.display = display;
+            this.update();
+        }
+
+        setMessage(message) {
+            this.message = message;
+        }
+
+        setType(type) {
+            if (['success', 'danger', 'warning', 'info'].includes(type)) {
+                this.type = type;
+            } else {
+                console.error('type ' + type + ' is not in the allowed values success,danger,warning and info')
+            }
+        }
+
+        update() {
+            this.elem.style.display = this.display ? 'block' : 'none';
+            this.elem.innerHTML = this.message;
+            this.elem.className = 'alert alert-' + this.type;
+        }
+
+    }
+
     const $text = document.querySelector('#text');
     const $start = document.querySelector('#start');
     const $output = document.querySelector('#alert');
@@ -53,6 +87,8 @@
 
     const EXTENDED_YOU = ' ' + EXTENDED.replace('?1', YOU).replace('?2', 'findest');
     const EXTENDED_ME = ' ' + EXTENDED.replace('?1', ME).replace('?2', 'finde');
+
+    const alert = new Alert($output);
 
     let timer;
 
@@ -68,38 +104,30 @@
         timer = window.setTimeout(calcFrech, 500);
     });
 
+    $output.addEventListener('click', () => {
+        navigator.clipboard.writeText(alert.message);
+    });
+
     function calcFrech() {
-        resetError();
+        alert.setDisplay(false);
         let text = $text.value.toLowerCase();
 
         let frechMatches = text.match(new RegExp(FRECH, 'g'));
         if (frechMatches) {
+            alert.setType('success');
             let lastMe = text.lastIndexOf(ME);
             let lastYou = text.lastIndexOf(YOU);
 
             if (lastMe < 0 && lastYou < 0 || lastMe > lastYou) {
-                text += EXTENDED_YOU
+                alert.setMessage(text + EXTENDED_YOU);
             } else if (lastMe < lastYou) {
-                text += EXTENDED_ME
+                alert.setMessage(text + EXTENDED_ME);
             }
         } else {
-            text = 'No ' + FRECH + ' found';
+            alert.setMessage('No ' + FRECH + ' found');
+            alert.setType('danger');
         }
-        showError(text);
-    }
-
-    function resetError() {
-        showError('');
-    }
-
-    function showError(message) {
-        $output.innerHTML = message;
-
-        if (message && $output.style.display === 'none') {
-            $output.style.display = 'block';
-        } else if (!message && $output.style.display === 'block') {
-            $output.style.display = 'none';
-        }
+        alert.setDisplay(true);
     }
 </script>
 </body>
